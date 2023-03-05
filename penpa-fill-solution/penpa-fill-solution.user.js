@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Penpa Fill Solution
-// @version     1.0.0
+// @version     1.0.1
 // @description Fill in the solution for a Penpa puzzle
 // @license     MIT
 // @author      MarkTekfan (marknn3)
@@ -184,12 +184,21 @@
         pu.redraw(false, false);
     }
 
-	// Add GM options
-	GM_registerMenuCommand(
-		"Penpa - Fill Solution",
-		() => {
-            penpaFillSolution();
+    setTimeout(() => {
+        if (typeof pu !== 'object' || !pu.solution) {
+            GM_registerMenuCommand(
+                "No Solution available",
+                () => {}
+            );
         }
-	);
+        else {
+            GM_registerMenuCommand(
+                "Penpa - Fill Solution",
+                () => {
+                    penpaFillSolution();
+                }
+            );
+        }
+    }, 1000);
 
 })();
