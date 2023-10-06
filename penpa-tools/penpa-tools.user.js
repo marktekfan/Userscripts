@@ -8,8 +8,8 @@
 // @match       */penpa-edit/*
 // @grant       GM_registerMenuCommand
 // @icon        https://icons.duckduckgo.com/ip2/github.io.ico
-// @updateURL   https://raw.githubusercontent.com/MarkTekfan/Userscripts/main/penpa-fill-solution/penpa-fill-solution.user.js
-// @downloadURL https://raw.githubusercontent.com/MarkTekfan/Userscripts/main/penpa-fill-solution/penpa-fill-solution.user.js
+// @updateURL   https://raw.githubusercontent.com/MarkTekfan/Userscripts/main/penpa-tools/penpa-tools.user.js
+// @downloadURL https://raw.githubusercontent.com/MarkTekfan/Userscripts/main/penpa-tools/penpa-tools.user.js
 // @supportURL  https://github.com/MarkTekfan/Userscripts/issues
 // @run-at      document-end
 // ==/UserScript==
