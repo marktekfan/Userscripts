@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name        Penpa Fill Solution
-// @version     1.0.1
-// @description Fill in the solution for a Penpa puzzle
+// @name        Penpa Tools
+// @version     1.1.0
+// @description Miscellaneous tools for Penpa puzzles
 // @license     MIT
 // @author      MarkTekfan (marknn3)
 // @namespace   http://github.com/MarkTekfan
@@ -11,6 +11,7 @@
 // @updateURL   https://raw.githubusercontent.com/MarkTekfan/Userscripts/main/penpa-fill-solution/penpa-fill-solution.user.js
 // @downloadURL https://raw.githubusercontent.com/MarkTekfan/Userscripts/main/penpa-fill-solution/penpa-fill-solution.user.js
 // @supportURL  https://github.com/MarkTekfan/Userscripts/issues
+// @run-at      document-end
 // ==/UserScript==
 
 /* globals pu */
@@ -184,21 +185,52 @@
         pu.redraw(false, false);
     }
 
+    function penpaShowCenterlist() {
+        pu.conflict_cells = [...pu.centerlist];
+        pu.redraw(false, false);
+    }
+
+    function penpaMarkCenterlist() {
+        const {symbol} = pu.pu_q;
+        for (let p of pu.centerlist) {
+            if (!symbol[p]) {
+                symbol[p] = [1, 'diamond_SS', 1];
+            }
+        }
+        pu.redraw(false, false);
+    }
+
     setTimeout(() => {
         if (typeof pu !== 'object' || !pu.solution) {
+            console.log(1);
             GM_registerMenuCommand(
-                "No Solution available",
+                " - No Solution available",
                 () => {}
             );
         }
         else {
+            console.log(2);
             GM_registerMenuCommand(
-                "Penpa - Fill Solution",
+                " Fill Solution",
                 () => {
                     penpaFillSolution();
                 }
             );
         }
-    }, 1000);
+
+        GM_registerMenuCommand(
+            " Colorize Centerlist",
+            () => {
+                penpaShowCenterlist();
+            }
+        );
+        GM_registerMenuCommand(
+            " Mark Centerlist",
+            () => {
+                penpaMarkCenterlist();
+            }
+        );
+
+    }, 500);
 
 })();
