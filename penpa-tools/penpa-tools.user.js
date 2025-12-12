@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Penpa Tools
-// @version     1.1.0
+// @version     1.2.0
 // @description Miscellaneous tools for Penpa puzzles
 // @license     MIT
 // @author      MarkTekfan (marknn3)
@@ -191,13 +191,112 @@
     }
 
     function penpaMarkCenterlist() {
-        const {symbol} = pu.pu_q;
+        const {symbol} = pu.pu_a;
         for (let p of pu.centerlist) {
             if (!symbol[p]) {
                 symbol[p] = [1, 'diamond_SS', 1];
             }
         }
         pu.redraw(false, false);
+    }
+
+    function compressToFreeLines() {
+        decompressToLines();
+
+        const lineE = pu.pu_q.lineE
+        const lineE_col = pu.pu_q_col.lineE
+        // Always start with lowest key
+        var keys = Object.keys(lineE).sort((a, b) => parseInt(a) - parseInt(b));
+        for (let i of keys) {
+            if (!lineE[i]) continue;
+
+            let i1 = Number(i.split(",")[0]);
+            let i2 = Number(i.split(",")[1]);
+            let start = i1;
+            let end = i2;
+            let style = lineE[i];
+            let color = lineE_col[i];
+            let step = i2 - i1;
+
+            let curr = i;
+            let next = `${i2},${i2 + step}`;
+
+            // Line continuation exists
+            if (lineE[next] === style && lineE_col[next] === color) {
+                lineE[curr] = null;
+                lineE_col[curr] = null;
+
+                do {
+                    lineE[next] = null;
+                    lineE_col[next] = null;
+                    //
+                    i2 += step;
+                    end = i2;
+                    curr = next;
+                    next = `${i2},${i2 + step}`;
+                } while (lineE[next] === style && lineE_col[next] === color);
+
+                // Add combined line
+                let newkey = `${start},${end}`;
+                pu.pu_q.freelineE[newkey] = style;
+                if (color)
+                    pu.pu_q_col.freelineE[newkey] = color;
+            }
+        }
+
+        // purge removed lines
+        Object.keys(lineE).forEach((k) => !lineE[k] && delete lineE[k]);
+        Object.keys(lineE_col).forEach((k) => !lineE_col[k] && delete lineE_col[k]);
+    }
+
+    function decompressToLines() {
+        const lineE = pu.pu_q.lineE
+        const lineE_col = pu.pu_q_col.lineE
+        const freelineE = pu.pu_q.freelineE
+        const freelineE_col = pu.pu_q_col.freelineE
+        const point = pu.point;
+
+        for (let i in freelineE) {
+            if (!freelineE[i]) continue;
+
+            let i1 = Number(i.split(",")[0]);
+            let i2 = Number(i.split(",")[1]);
+            // Not a horizontal or vertical line (nly valid for square grids)
+            if (point[i1].x != point[i2].x && point[i1].y != point[i2].y) continue;
+
+            let step = (Math.floor(i1 / pu.nx0) === Math.floor(i2 / pu.nx0))
+                      ? 1       // Horizontal line
+                      : pu.nx0; // Vertical line
+
+            let start = i1;
+            let end = i2;
+            let style = freelineE[i];
+            let color = freelineE_col[i];
+
+            do {
+                i2 = i1 + step;
+                let curr = `${i1},${i2}`;
+
+                // Don't overwrite exiting line
+                if (!lineE[curr]) {
+                    lineE[curr] = style;
+                    if (color) lineE_col[curr] = color;
+                }
+
+                i1 = i2;
+            } while (i2 < end);
+
+            // Should always end exactly
+            if (i2 != end)
+                console.warn('line does not match freeline. Key:', i);
+
+            delete freelineE[i]
+            delete freelineE_col[i]
+        }
+
+        // purge removed lines
+        Object.keys(freelineE).forEach((k) => !freelineE[k] && delete freelineE[k]);
+        Object.keys(freelineE_col).forEach((k) => !freelineE_col[k] && delete freelineE_col[k]);
     }
 
     setTimeout(() => {
@@ -218,16 +317,29 @@
             );
         }
 
+        // GM_registerMenuCommand(
+        //     " Colorize Centerlist",
+        //     () => {
+        //         penpaShowCenterlist();
+        //     }
+        // );
+        // GM_registerMenuCommand(
+        //     " Mark Centerlist",
+        //     () => {
+        //         penpaMarkCenterlist();
+        //     }
+        // );
+
         GM_registerMenuCommand(
-            " Colorize Centerlist",
+            "Compress (for shorter URL)",
             () => {
-                penpaShowCenterlist();
+                compressToFreeLines();
             }
         );
         GM_registerMenuCommand(
-            " Mark Centerlist",
+            "Decompress (for Editing)",
             () => {
-                penpaMarkCenterlist();
+                decompressToLines();
             }
         );
 
