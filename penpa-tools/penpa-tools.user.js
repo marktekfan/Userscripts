@@ -334,12 +334,14 @@
             "Compress (for shorter URL)",
             () => {
                 compressToFreeLines();
+                alert('Edge lines are now converted to FreeLines.\nThis can result in a significantly shorter URL.');
             }
         );
         GM_registerMenuCommand(
             "Decompress (for Editing)",
             () => {
                 decompressToLines();
+                alert('FreeLines are now converted back to Edge lines.\nThis will make it easier to edit Edge lines.');
             }
         );
 
